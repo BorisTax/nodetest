@@ -5,7 +5,7 @@ const subSocket = zmq.socket("sub");
 const pubPort = +process.argv[2];
 const subPort = +process.argv[3];
 if (!pubPort || !subPort || pubPort==subPort) {
-  console.error('No ports specified!');
+  console.error('Incorrect ports!');
   process.exit();
 }
 pubSocket.connect(`tcp://127.0.0.1:${subPort}`);
