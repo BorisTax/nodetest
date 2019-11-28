@@ -15,23 +15,23 @@ const db = new sqlite3.Database('./db/test.db', sqlite3.OPEN_READONLY, (err) => 
 });
 
 subSocket.subscribe('api_in');
-subSocket.on('message', (key, message) => {
-  const mess = JSON.parse(message.utf8Slice());
+subSocket.on('message', (topic, message) => {
+  const data = JSON.parse(message.utf8Slice());
   const response = {};
-  if (!mess.email || !mess.pwd) {
-    response.msg_id = mess.msg_id;
+  if (!data.email || !data.pwd) {
+    response.msg_id = data.msg_id;
     response.status = "error";
     response.error = 'WRONG_FORMAT';
     pubSocket.send(['api_out', JSON.stringify(response)]);
     return;
   }
-  if (mess.type == 'login') {
+  if (data.type == 'login') {
     db.all(`SELECT * FROM user`, (err, rows) => {
       if (err) return console.error(err.message);
       let user_id;
       for (let row of rows)
-        if (mess.email == row.email && mess.pwd == row.passw) user_id = row.user_id;
-      response.msg_id = mess.msg_id
+        if (data.email == row.email && data.pwd == row.passw) user_id = row.user_id;
+      response.msg_id = data.msg_id
       if (user_id) {
         response.user_id = user_id;
         response.status = "ok";

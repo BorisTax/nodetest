@@ -12,7 +12,7 @@ pubSocket.connect(`tcp://127.0.0.1:${subPort}`);
 subSocket.connect(`tcp://127.0.0.1:${pubPort}`);
 
 subSocket.subscribe('api_out');
-subSocket.on('message', (key, message) => {
+subSocket.on('message', (topic, message) => {
   const res = JSON.parse(message.utf8Slice());
   if (res.status == 'ok') console.log('ok');
   else console.log(res.error);
