@@ -18,28 +18,25 @@ subSocket.subscribe('api_in');
 subSocket.on('message', (topic, message) => {
   const data = JSON.parse(message.utf8Slice());
   const response = {};
-  if (!data.email || !data.pwd) {
-    response.msg_id = data.msg_id;
-    response.status = "error";
-    response.error = 'WRONG_FORMAT';
-    pubSocket.send(['api_out', JSON.stringify(response)]);
-    return;
-  }
   if (data.type == 'login') {
-    db.all(`SELECT * FROM user`, (err, rows) => {
-      if (err) return console.error(err.message);
-      let user_id;
-      for (let row of rows)
-        if (data.email == row.email && data.pwd == row.passw) user_id = row.user_id;
-      response.msg_id = data.msg_id
-      if (user_id) {
-        response.user_id = user_id;
-        response.status = "ok";
-      } else {
-        response.status = "error";
-        response.error = 'WRONG_PWD';
-      }
+    if (!data.email || !data.pwd) {
+      response.msg_id = data.msg_id;
+      response.status = "error";
+      response.error = 'WRONG_FORMAT';
       pubSocket.send(['api_out', JSON.stringify(response)]);
-    });
+      return;
+    }
+    db.all(`SELECT * FROM user WHERE email='${data.email}' AND passw='${data.pwd}'`, (err, rows) => {
+        if (err) return console.error(err.message);
+        response.msg_id = data.msg_id
+        if (rows.length>0) {
+          response.user_id = rows[0].user_id;
+          response.status = "ok";
+        } else {
+          response.status = "error";
+          response.error = 'WRONG_PWD';
+        }
+        pubSocket.send(['api_out', JSON.stringify(response)]);
+      });
   }
 });
